@@ -1,0 +1,178 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Sample Stack",
+  "Resources": {
+    "SampleDynamoTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits" : 3,
+          "WriteCapacityUnits" : 3
+        }
+      }
+    },
+    "SampleLambdaExecutionRole": {
+      "DependsOn": [
+        "SampleDynamoTable"
+      ],
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version" : "2012-10-17",
+          "Statement": [ 
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": [
+                "sts:AssumeRole"
+              ]
+            }
+          ]
+        },
+        "Path": "/",
+        "Policies": [
+          {
+            "PolicyName": {
+              "Fn::Join": [
+                "",
+                [
+                  "SampleLambdaExecutionRole",
+                  {
+                    "Ref": "AWS::StackName"
+                  }
+                ]
+              ]
+            },
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": "arn:aws:logs:*:*:*"
+                },
+                {
+                  "Action": [
+                    "dynamodb:DeleteItem",
+                    "dynamodb:GetItem",
+                    "dynamodb:PutItem",
+                    "dynamodb:Query",
+                    "dynamodb:Scan",
+                    "dynamodb:UpdateItem"
+                  ],
+                  "Effect": "Allow",
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:dynamodb:",
+                          {
+                            "Ref": "AWS::Region"
+                          },
+                          ":",
+                          {
+                            "Ref": "AWS::AccountId"
+                          },
+                          ":table/",
+                          {
+                            "Ref": "SampleDynamoTable"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "SampleLambda": {
+      "DependsOn": [
+        "SampleLambdaExecutionRole",
+        "SampleDynamoTable"
+      ],
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Code": {
+          "ZipFile": {
+            "Fn::Join": [
+              "",
+              [
+                "  console.log('Loading function');",
+                "",
+                "  var AWS = require('aws-sdk');",
+                "  var dynamo = new AWS.DynamoDB.DocumentClient();",
+                "",
+                "  exports.handler = function(event, context) {",
+                "    console.log('Received event: %j', event);",
+                "",
+                {"Fn::Join": ["", ["    var TABLE = '", {"Ref": "SampleDynamoTable"},"';"]]},
+                "    dynamo.put({",
+                "      Item: event,",
+                "      TableName: TABLE",
+                "    }, function(err, data) {",
+                "      if (err) {",
+                "        console.error('Request failure! %j', err);",
+                "        return context.done(err, null);",
+                "      }",
+                "      console.log('Request success! %j', data);",
+                "      context.done(err, item);",
+                "    });",
+                "",
+                "  };"
+              ]
+            ]
+          }
+        },
+        "Description": "Lambda to integrate test asset with.",
+        "Handler": "index.handler",
+        "MemorySize": 128,
+        "Role": {
+          "Fn::GetAtt": [
+            "SampleLambdaExecutionRole",
+            "Arn"
+          ]
+        },
+        "Runtime": "nodejs",
+        "Timeout": 300
+      }
+    }
+  },
+  "Outputs": {
+    "TableName": {
+      "Description": "Name of the DynamoDB table we made.",
+      "Value": {
+        "Ref": "SampleDynamoTable"
+      }
+    },
+    "LambdaName": {
+      "Description": "Name of the Lambda we made.",
+      "Value": {
+        "Ref": "SampleLambda"
+      }
+    }
+  }
+}

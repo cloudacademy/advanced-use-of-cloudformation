@@ -1,0 +1,50 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "Sample Stack",
+  "Resources": {
+    "ChildStackA": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3-us-west-2.amazonaws.com/us-west-2.cfn-demos.templeton.host/nesteds/childA.json",
+        "Parameters": {}
+      }
+    },
+    "ChildStackB": {
+      "DependsOn": [
+        "ChildStackA"
+      ],
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": "https://s3-us-west-2.amazonaws.com/us-west-2.cfn-demos.templeton.host/nesteds/childB.json",
+        "Parameters": {
+          "DynamoTableName": {
+            "Fn::GetAtt": [
+              "ChildStackA",
+              "Outputs.DynamoTableName"
+            ]
+          }
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "TableName": {
+      "Description": "Name of the DynamoDB table we made.",
+      "Value": {
+        "Fn::GetAtt": [
+          "ChildStackA",
+          "Outputs.DynamoTableName"
+        ]
+      }
+    },
+    "LambdaName": {
+      "Description": "Name of the Lambda we made.",
+      "Value": {
+        "Fn::GetAtt": [
+          "ChildStackB",
+          "Outputs.LambdaName"
+        ]
+      }
+    }
+  }
+}

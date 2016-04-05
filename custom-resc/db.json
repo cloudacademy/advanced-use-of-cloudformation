@@ -1,0 +1,33 @@
+{
+  "Resources": {
+    "SampleDynamoTable": {
+      "Type": "AWS::DynamoDB::Table",
+      "Properties": {
+        "AttributeDefinitions": [
+          {
+            "AttributeName": "id",
+            "AttributeType": "S"
+          }
+        ],
+        "KeySchema": [
+          {
+            "AttributeName": "id",
+            "KeyType": "HASH"
+          }
+        ],
+        "ProvisionedThroughput": {
+          "ReadCapacityUnits" : 3,
+          "WriteCapacityUnits" : 3
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "DynamoDBTable": {
+      "Description": "Table name",
+      "Value": {
+        "Ref": "SampleDynamoTable"
+      }
+    }
+  }
+}

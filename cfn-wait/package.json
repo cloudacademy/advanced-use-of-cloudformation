@@ -1,0 +1,32 @@
+{
+  "name": "cfn-wait",
+  "version": "0.0.1",
+  "description": "Wait in Bash for CloudFormation stacks to finish.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "cloudformation",
+    "wait",
+    "for",
+    "stack",
+    "to",
+    "finish",
+    "complete",
+    "aws",
+    "cfn",
+    "template",
+    "automation",
+    "ci",
+    "cd",
+    "continuous",
+    "delivery",
+    "integration"
+  ],
+  "author": "Andrew Templeton",
+  "license": "MIT",
+  "dependencies": {
+    "aws-sdk": "2.2.29"
+  }
+}
