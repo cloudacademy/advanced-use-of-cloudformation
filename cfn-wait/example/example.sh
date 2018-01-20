@@ -11,7 +11,7 @@ export AWS_REGION=$2;
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
 # Standard AWS CLI command to create a stack. Adjust this to fit your use case.
-aws --region us-west-2 --profile andrew-admin cloudformation create-stack \
+aws cloudformation create-stack \
   --stack-name "$STACK" \
   --template-body fileb://"$DIR"/example.template \
   --capabilities 'CAPABILITY_IAM';
