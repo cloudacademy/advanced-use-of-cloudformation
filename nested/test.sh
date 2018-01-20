@@ -14,7 +14,7 @@ aws --region us-west-2 s3 cp --recursive "$DIR"'/templates/' 's3://us-west-2.cfn
 # Standard AWS CLI command to create a stack. Adjust this to fit your use case.
 aws --region us-west-2 --profile andrew-admin cloudformation create-stack \
   --stack-name "$STACK" \
-  --template-url 'https://s3-us-west-2.amazonaws.com/us-west-2.cfn-demos.templeton.host/nesteds/parent.json' \
+  --template-url 'https://s3-us-west-2.amazonaws.com/us-west-2.cfn-demos.templeton.host/nesteds/parent.yml' \
   --capabilities 'CAPABILITY_IAM';
 
 # This is the wait function that uses the poll-based method to detect stack completion.
